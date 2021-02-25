@@ -1,16 +1,33 @@
-# This is a sample Python script.
+import requests
+from bs4 import BeautifulSoup
+from io import StringIO
+import pandas as pd
+import ast
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+states = open("C:\\Users\\ritan\\Downloads\\usa.states.txt", "r")
+print(states.read())
 
+page = requests.get('https://codegolf.stackexchange.com/questions/64254/states-and-capitals')#https://www.britannica.com/topic/list-of-state-capitals-in-the-United-States-2119210')
+print(page.status_code)
+page.content
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+soup = BeautifulSoup(page.content, 'html.parser')
+capitalstate = str(list(soup.find('code').find_next('code').find_next('code')))
+print(type(capitalstate))
 
+capitalstatedictstr = capitalstate.replace(',', ':').replace('\\n', ',').replace('[', '').replace(']', '').rstrip("'").rstrip(",").lstrip("'")
+print(capitalstatedictstr)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+df = pd.DataFrame([x.split(':') for x in capitalstatedictstr.split(',')])
+df.columns = ['Capital', 'State']
+df = df[['State', 'Capital']]
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+print(df)
+df.to_csv('C:\\Users\\ritan\\Downloads\\usa.states.csv',index=False)
+
+'''capitalstatedata = StringIO("""Capital: State 
+    Baton Rouge: Louisiana
+    Indianapolis: Indiana 
+    """)
+df = pd.read_csv(capitalstatedata, sep=":")
+print(df)'''
